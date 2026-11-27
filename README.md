@@ -183,6 +183,44 @@ You need Docker, docker-compose and git setup on your machine. Refer [Docker doc
 -   Username: Administrator
 -   Password: admin
 
+---
+
+## DevOps & Cloud FinOps Architecture (Task 15)
+
+**Candidate:** Gourob Das (`gourobdas0103`)  
+**Target AWS Region:** `ap-south-1` (Mumbai)  
+**AWS Account ID:** `394123064953`  
+**Framework:** FinOps Foundation Operating Model (*Inform, Optimize, Operate*)  
+
+As part of **Task 15: FinOps Cloud Cost Optimization & Enterprise Documentation**, the production AWS infrastructure supporting Frappe CRM has been re-architected to optimize cost efficiency, enforce artifact governance, and establish automated budget visibility without compromising high availability.
+
+### Key Architectural Highlights:
+1. **Hybrid Fargate Spot Strategy:**
+   - ECS Cluster Capacity Provider configured with **Base 1 FARGATE (On-Demand)** for guaranteed availability and a **1:4 ratio (80% allocation) for FARGATE_SPOT**, saving up to 70% on scale-out compute.
+   - Dual-metric **Target Tracking Auto-Scaling** (70% CPU, 80% RAM; Min: 1, Desired: 2, Max: 4 tasks).
+   - **Scheduled Auto-Scaling**: Scales down to 1 task during off-peak hours (18:00 UTC) and scales up to 2 tasks during business hours (03:00 UTC).
+2. **Network Optimization & PrivateLink:**
+   - **AWS S3 Gateway Endpoint** (Free of charge) eliminates NAT Gateway data processing fees ($0.045/GB) for container image layer pulls.
+   - Private VPC Interface Endpoints for ECR API, ECR DKR, CloudWatch Logs, and Secrets Manager.
+   - ALB idle connection timeout tuned from 60s to 30s to reclaim backend connection resources.
+3. **Storage & Artifact Lifecycle Governance:**
+   - **Amazon ECR Lifecycle Policy**: Retains strictly the last 5 tagged releases and purges untagged images older than 1 day, reducing container storage costs by 83.3%.
+   - **CloudWatch Logs Retention**: Configured to 7 days (instead of indefinite retention), reducing long-term log storage accumulation by >95%.
+   - **RDS MariaDB Storage**: Baseline 20 GB `gp3` storage with included 3000 IOPS and 125 MB/s throughput at no extra provisioned cost, with autoscaling up to 50 GB.
+4. **Governance, Budgets & Alerting:**
+   - Mandatory AWS Cost Allocation Tags: `Project`, `Environment`, `CostCenter` (`DevOps-FinOps`), `Owner` (`Gourob Das`), `ManagedBy` (`Terraform`).
+   - Automated **AWS Budget** set at `$50.00 USD/month` with dual-threshold SNS and email alerts at 80% actual spend and 100% forecasted spend.
+
+### Enterprise FinOps Documentation Deliverables:
+- **Comprehensive Architecture & Strategy Guide:** [`docs/FINOPS_COST_OPTIMIZATION.md`](docs/FINOPS_COST_OPTIMIZATION.md)
+- **Itemized ap-south-1 Cost & ROI Model:** [`docs/COST_BREAKDOWN.md`](docs/COST_BREAKDOWN.md)
+- **Terraform FinOps Modules:**
+  - Capacity Providers & Autoscaling: [`terraform/autoscaling.tf`](terraform/autoscaling.tf)
+  - ECR Lifecycle, VPC Endpoints & Tags: [`terraform/finops.tf`](terraform/finops.tf)
+  - AWS Budgets & Cost Alarms: [`terraform/budgets.tf`](terraform/budgets.tf)
+
+---
+
 ## Learn and connect
 
 -   [Telegram Public Group](https://t.me/frappecrm)

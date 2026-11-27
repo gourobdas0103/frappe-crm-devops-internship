@@ -19,24 +19,5 @@ resource "aws_ecr_repository" "app" {
   }
 }
 
-# Lifecycle Policy: Retains last 10 images to conserve storage costs
-resource "aws_ecr_lifecycle_policy" "cleanup" {
-  repository = aws_ecr_repository.app.name
+# Lifecycle Policy is defined in finops.tf as part of FinOps Storage Governance
 
-  policy = jsonencode({
-    rules = [
-      {
-        rulePriority = 1
-        description  = "Keep last 10 untagged and tagged release images"
-        selection = {
-          tagStatus   = "any"
-          countType   = "imageCountMoreThan"
-          countNumber = 10
-        }
-        action = {
-          type = "expire"
-        }
-      }
-    ]
-  })
-}

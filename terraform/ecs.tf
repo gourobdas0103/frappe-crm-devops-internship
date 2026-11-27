@@ -19,7 +19,7 @@ resource "aws_ecs_cluster" "main" {
 # 2. CloudWatch Log Group for Application Container
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
-  retention_in_days = 14
+  retention_in_days = var.log_retention_days
 
   tags = {
     Name = "${var.project_name}-ecs-logs"
@@ -97,13 +97,25 @@ resource "aws_ecs_task_definition" "app" {
   }
 }
 
-# 4. ECS Service with CodeDeploy Deployment Controller
+# 4. ECS Service with CodeDeploy Deployment Controller and Fargate Spot Capacity Strategy
 resource "aws_ecs_service" "app" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = var.app_count
-  launch_type     = "FARGATE"
+
+  # Hybrid Fargate + Fargate Spot Strategy (1 Baseline Fargate task + 80% Fargate Spot scale-out)
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = 1
+    base              = 1
+  }
+
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 4
+    base              = 0
+  }
 
   # CRITICAL: deployment_controller MUST be CODE_DEPLOY for Blue-Green ALB routing
   deployment_controller {
@@ -125,14 +137,16 @@ resource "aws_ecs_service" "app" {
   lifecycle {
     ignore_changes = [
       task_definition,
-      load_balancer
+      load_balancer,
+      desired_count
     ]
   }
 
   depends_on = [
     aws_lb_listener.prod,
     aws_lb_listener.test,
-    aws_iam_role_policy_attachment.ecs_execution_base
+    aws_iam_role_policy_attachment.ecs_execution_base,
+    aws_ecs_cluster_capacity_providers.main
   ]
 
   tags = {

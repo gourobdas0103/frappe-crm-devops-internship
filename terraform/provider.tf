@@ -10,6 +10,8 @@ provider "aws" {
     tags = {
       Project     = var.project_name
       Environment = var.environment
+      CostCenter  = var.cost_center
+      Owner       = var.owner
       ManagedBy   = "Terraform"
       Repository  = "frappe-crm-devops-internship"
     }

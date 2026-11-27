@@ -147,3 +147,70 @@ variable "termination_wait_time_in_minutes" {
   type        = number
   default     = 5
 }
+
+# --- FinOps & Cost Optimization ---
+variable "cost_center" {
+  description = "FinOps cost center for cost allocation tagging"
+  type        = string
+  default     = "DevOps-FinOps"
+}
+
+variable "owner" {
+  description = "Resource owner for cost tracking"
+  type        = string
+  default     = "Gourob Das"
+}
+
+variable "log_retention_days" {
+  description = "CloudWatch log retention period in days (reduced from 14 to 7 for FinOps cost reduction)"
+  type        = number
+  default     = 7
+}
+
+variable "alb_idle_timeout" {
+  description = "ALB idle connection timeout in seconds (tuned to 30s to reclaim connection resources)"
+  type        = number
+  default     = 30
+}
+
+variable "enable_vpc_endpoints" {
+  description = "Enable AWS VPC Endpoints to eliminate NAT Gateway data processing fees"
+  type        = bool
+  default     = true
+}
+
+variable "monthly_budget_limit" {
+  description = "Monthly budget limit in USD for AWS Budgets cost alerting"
+  type        = string
+  default     = "50.0"
+}
+
+variable "budget_alert_email" {
+  description = "Email address for AWS Budget notifications and cost alerts"
+  type        = string
+  default     = "gourobdas0103@gmail.com"
+}
+
+variable "ecs_autoscale_min_capacity" {
+  description = "Minimum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 1
+}
+
+variable "ecs_autoscale_max_capacity" {
+  description = "Maximum number of ECS tasks for auto-scaling"
+  type        = number
+  default     = 4
+}
+
+variable "ecs_cpu_target_utilization" {
+  description = "Target average CPU utilization percentage for ECS auto-scaling"
+  type        = number
+  default     = 70.0
+}
+
+variable "ecs_memory_target_utilization" {
+  description = "Target average Memory utilization percentage for ECS auto-scaling"
+  type        = number
+  default     = 80.0
+}

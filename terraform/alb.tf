@@ -8,6 +8,7 @@ resource "aws_lb" "main" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
   subnets            = aws_subnet.public[*].id
+  idle_timeout       = var.alb_idle_timeout
 
   enable_deletion_protection = false
 
